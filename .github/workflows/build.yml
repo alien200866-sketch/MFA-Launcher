@@ -103,7 +103,15 @@ jobs:
 
       - name: Run build
         run: |
-          cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE"
+          set -o pipefail
+          # MFA: keep a copy of the output and surface compiler errors as annotations
+          if ! cmake --build --preset "$CMAKE_PRESET" --config "$BUILD_TYPE" 2>&1 | tee build-output.txt; then
+            grep -E "error|Error|undefined reference|not found" build-output.txt | grep -v "Applet" | head -45 | while IFS= read -r line; do
+              echo "::error::${line//%/%25}"
+            done
+            echo "::error::LAST LINES: $(tail -n 15 build-output.txt | tr '\n' ' ' | tr -s ' ' | cut -c1-900)"
+            exit 1
+          fi
 
       - name: Run tests
         env:
