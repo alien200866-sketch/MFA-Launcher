@@ -49,6 +49,17 @@ jobs:
           cp "$(find dl -name '*portable.tar.gz' | head -n1)" out/MFALauncher-Linux-Portable.tar.gz
           ls -la out
 
+      - name: Check publishing access
+        continue-on-error: true
+        run: |
+          SHA=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.head_sha')
+          echo "::warning::actor=${{ github.actor }} triggering_actor=${{ github.triggering_actor }} event=${{ github.event_name }}"
+          out=$(gh api -X POST "repos/$REPO/git/refs" -f ref=refs/tags/mfa-probe -f sha="$SHA" 2>&1) && echo "::warning::tag on build commit OK" || echo "::warning::tag on build commit FAILED: $out"
+          gh api -X DELETE "repos/$REPO/git/refs/tags/mfa-probe" >/dev/null 2>&1 || true
+          out=$(gh api -X POST "repos/$REPO/git/refs" -f ref=refs/tags/mfa-probe2 -f sha="${{ github.sha }}" 2>&1) && echo "::warning::tag on workflow commit OK" || echo "::warning::tag on workflow commit FAILED: $out"
+          gh api -X DELETE "repos/$REPO/git/refs/tags/mfa-probe2" >/dev/null 2>&1 || true
+          out=$(gh api "repos/$REPO/releases" 2>&1 | head -c 200) && echo "::warning::list releases: $out"
+
       - name: Publish as the "latest" release
         run: |
           set -euo pipefail
