@@ -62,9 +62,12 @@ jobs:
             "" \
             "The portable versions keep everything in their own folder and need no installing.")
           gh release delete latest -R "$REPO" -y --cleanup-tag || true
-          gh release create latest -R "$REPO" --target "$SHA" \
+          if ! gh release create latest -R "$REPO" --target "$SHA" \
             --title "MFA Launcher (latest)" --notes "$NOTES" --latest \
             out/MFALauncher-Setup.exe \
             out/MFALauncher-Linux-x86_64.AppImage \
             out/MFALauncher-Windows-Portable.zip \
-            out/MFALauncher-Linux-Portable.tar.gz
+            out/MFALauncher-Linux-Portable.tar.gz > release-output.txt 2>&1; then
+            while IFS= read -r line; do echo "::error::$line"; done < release-output.txt
+            exit 1
+          fi
