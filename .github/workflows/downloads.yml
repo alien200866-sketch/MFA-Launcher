@@ -1,0 +1,70 @@
+name: Publish downloads
+
+# Puts the files from a successful build on the repository's Releases page
+# under the "latest" release, with fixed names, so they can be downloaded
+# without a GitHub account from links that never change.
+
+on:
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: ID of a successful Build run to publish
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publish-downloads
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      RUN_ID: ${{ inputs.run_id || github.event.workflow_run.id }}
+    steps:
+      - name: Download build files
+        run: |
+          set -euo pipefail
+          gh run download "$RUN_ID" -R "$REPO" -D dl
+          find dl -maxdepth 2 | sort
+
+      - name: Gather files with fixed names
+        run: |
+          set -euo pipefail
+          mkdir out
+          cp "$(find dl -path '*Windows-MSVC-Setup*' -name '*.exe' | head -n1)" out/MFALauncher-Setup.exe
+          cp "$(find dl -name '*.AppImage' -type f | head -n1)" out/MFALauncher-Linux-x86_64.AppImage
+          chmod +x out/MFALauncher-Linux-x86_64.AppImage
+          (cd "$(find dl -maxdepth 1 -type d -name '*Windows-MSVC-Portable*' | head -n1)" && zip -qr "$GITHUB_WORKSPACE/out/MFALauncher-Windows-Portable.zip" .)
+          cp "$(find dl -name '*portable.tar.gz' | head -n1)" out/MFALauncher-Linux-Portable.tar.gz
+          ls -la out
+
+      - name: Publish as the "latest" release
+        run: |
+          set -euo pipefail
+          SHA=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.head_sha')
+          NOTES=$(printf '%s\n' \
+            "Built $(date -u '+%d %B %Y') from commit ${SHA:0:7}." \
+            "" \
+            "**Windows:** download **MFALauncher-Setup.exe** and run it. If Windows says *Windows protected your PC*, click **More info → Run anyway**." \
+            "" \
+            "**Linux:** download **MFALauncher-Linux-x86_64.AppImage**, allow it to run as a program (Properties → Permissions), then double-click it." \
+            "" \
+            "The portable versions keep everything in their own folder and need no installing.")
+          gh release delete latest -R "$REPO" -y --cleanup-tag || true
+          gh release create latest -R "$REPO" --target "$SHA" \
+            --title "MFA Launcher (latest)" --notes "$NOTES" --latest \
+            out/MFALauncher-Setup.exe \
+            out/MFALauncher-Linux-x86_64.AppImage \
+            out/MFALauncher-Windows-Portable.zip \
+            out/MFALauncher-Linux-Portable.tar.gz
