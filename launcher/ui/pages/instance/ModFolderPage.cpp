@@ -45,6 +45,7 @@
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
+#include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
@@ -68,6 +69,7 @@
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
+#include "ui/widgets/MfaModsPanel.h"
 
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
@@ -132,6 +134,26 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
 bool ModFolderPage::shouldDisplay() const
 {
     return true;
+}
+
+void ModFolderPage::enableMfaPanel()
+{
+    if (m_mfaPanel != nullptr) {
+        return;
+    }
+    // Put the MFA mods column to the left of the existing mod list.
+    auto* existing = takeCentralWidget();
+    auto* wrapper = new QWidget(this);
+    auto* layout = new QHBoxLayout(wrapper);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(6);
+
+    m_mfaPanel = new MfaModsPanel(m_instance, m_model, wrapper);
+    layout->addWidget(m_mfaPanel);
+    if (existing != nullptr) {
+        layout->addWidget(existing, 1);
+    }
+    setCentralWidget(wrapper);
 }
 
 void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)

@@ -1119,6 +1119,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LogView.cpp
     ui/widgets/LogView.h
     ui/widgets/InfoFrame.cpp
+    ui/widgets/MfaModsPanel.cpp
+    ui/widgets/MfaModsPanel.h
     ui/widgets/InfoFrame.h
     ui/widgets/ModFilterWidget.cpp
     ui/widgets/ModFilterWidget.h

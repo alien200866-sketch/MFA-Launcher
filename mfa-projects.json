@@ -1,0 +1,31 @@
+{
+    "_help": "MFA Launcher reads this list to fill the MFA Mods column on the Mods page. Add a new mod's CurseForge Project ID (shown on the right of its CurseForge page) to the top of the list. Only projects by the author below are shown.",
+    "author": "AndyMFAMinecraft",
+    "projects": [
+        1758509,
+        1757528,
+        1755713,
+        1755050,
+        1754236,
+        1750491,
+        1745605,
+        1744925,
+        1741846,
+        1741069,
+        1739956,
+        1739748,
+        1739245,
+        1739159,
+        1735156,
+        1735060,
+        1734230,
+        1733257,
+        1732540,
+        1731692,
+        1730982,
+        1730131,
+        1726153,
+        1724874,
+        1724310
+    ]
+}

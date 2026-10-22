@@ -32,6 +32,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(ManagedPackPage::createPage(inst));
         auto modsPage = new ModFolderPage(inst, inst->loaderModList());
         modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
+        modsPage->enableMfaPanel();
         values.append(modsPage);
         values.append(new CoreModFolderPage(inst, inst->coreModList()));
         values.append(new NilModFolderPage(inst, inst->nilModList()));

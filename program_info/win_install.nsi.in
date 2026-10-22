@@ -390,21 +390,12 @@ Section "@Launcher_DisplayName@"
   ; Write the installation path into the registry
   WriteRegStr HKCU Software\@Launcher_CommonName@ "InstallDir" "$INSTDIR"
 
-  ; Write the URL Handler into registry for curseforge
-  WriteRegStr HKCU Software\Classes\curseforge "URL Protocol" ""
-  WriteRegStr HKCU Software\Classes\curseforge\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
+  ; MFA Launcher: the curseforge://, modrinth:// and prismlauncher:// link handlers
+  ; are left alone so they keep opening Prism Launcher if it is installed.
 
-  ; Write the URL Handler into registry for modrinth
-  WriteRegStr HKCU Software\Classes\modrinth "URL Protocol" ""
-  WriteRegStr HKCU Software\Classes\modrinth\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
-
-  ; Write the URL Handler into registry for prismlauncher
+  ; Write the URL Handler into registry for mfalauncher
   WriteRegStr HKCU Software\Classes\@Launcher_APP_BINARY_NAME@ "URL Protocol" ""
   WriteRegStr HKCU Software\Classes\@Launcher_APP_BINARY_NAME@\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
-
-  ; Write the URL Handler into registry for prismlauncher import
-  WriteRegStr HKCU Software\Classes\prismlauncher "URL Protocol" ""
-  WriteRegStr HKCU Software\Classes\prismlauncher\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 
   ; Write the uninstall keys for Windows
   ; https://learn.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key

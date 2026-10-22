@@ -42,6 +42,8 @@
 #include "ExternalResourcesPage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
+class MfaModsPanel;
+
 class ModFolderPage : public ExternalResourcesPage {
     Q_OBJECT
 
@@ -52,6 +54,9 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual ~ModFolderPage() = default;
 
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
+
+    /** Adds the MFA mods column to the left of the mod list. */
+    void enableMfaPanel();
 
     virtual QString displayName() const override { return tr("Mods"); }
     virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
@@ -76,6 +81,7 @@ class ModFolderPage : public ExternalResourcesPage {
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
+    MfaModsPanel* m_mfaPanel = nullptr;
 };
 
 class CoreModFolderPage : public ModFolderPage {
